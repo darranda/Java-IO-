@@ -3,10 +3,17 @@ package com.IOProject;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
+import java.nio.file.attribute.FileTime;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
 
 public class FileManager {
+
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
     public static void main(String[] args) {
 
 
@@ -78,14 +85,27 @@ public class FileManager {
                     .filter(Files::isRegularFile)
                     .forEach(path -> {
                         File file = path.toFile();
-                        System.out.println(file.getName() + " " + file.length() + " " + file.lastModified());
+                        System.out.println(file.getName() + " " + file.length() + " " + getLastModifiedFile(file));
                     });
         } catch (IOException e) {
             System.out.println("Error: " + e.getMessage());
         }
     }
 
-        //copy file
+    // format the last modified times
+    private static String getLastModifiedFile(File file) {
+        Path filePath = file.toPath();
+        try {
+            FileTime lastModifiedTime = Files.getLastModifiedTime(filePath);
+            LocalDateTime dateTime = LocalDateTime.ofInstant(lastModifiedTime.toInstant(), ZoneOffset.systemDefault());
+            return dateTime.format(formatter);
+        } catch (IOException e) {
+            System.out.println("Error: " + e.getMessage());
+            return "";
+        }
+    }
+
+    //copy file
         private static void copyFile(Path directoryPath, Scanner scanner) {
             System.out.println("Enter the source file name:");
             String sourceFile = scanner.nextLine();
